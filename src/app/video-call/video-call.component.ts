@@ -35,7 +35,7 @@ export class VideoCallComponent implements OnInit {
     this.database = firebase.database().ref();
     this.myVideo = document.getElementById("myVideo");
     this.clientVideo = document.getElementById("clientVideo");
-    this.id = Math.floor(Math.random()*1000000000);
+    this.id = 119;
    
     this.pc = new RTCPeerConnection(this.servers);
     console.log("hh",this.pc);
@@ -64,7 +64,7 @@ export class VideoCallComponent implements OnInit {
     let msg = JSON.parse(data.val().message);
     let sender = data.val().sender;
     console.log("data from database",data,sender)
-    
+    if (sender !== 119) {
     if (msg.ice != undefined)
     this.pc.addIceCandidate(new RTCIceCandidate(msg.ice));
     else if (msg.sdp.type == "offer")
@@ -74,7 +74,7 @@ export class VideoCallComponent implements OnInit {
     .then(() => this.sendMessage(this.id, JSON.stringify({'sdp': this.pc.localDescription})));
     else if (msg.sdp.type == "answer")
     this.pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-    
+    }
     
    };
    
