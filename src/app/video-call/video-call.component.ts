@@ -19,7 +19,7 @@ export class VideoCallComponent implements OnInit {
     'iceServers': [{ 'urls': 'stun:stun.services.mozilla.com' }, { 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'turn:numb.viagenie.ca', 'credential': 'webrtc', 'username': 'websitebeaver@mail.com' }]
   };
   ngOnInit(): void {
-    const config = {
+    var config = {
       apiKey: "AIzaSyB7tTYfwZsb6admw0Q2f1zC3kGBnk9lUis",
       authDomain: "koumirtc.firebaseapp.com",
       databaseURL: "https://koumirtc.firebaseio.com",
