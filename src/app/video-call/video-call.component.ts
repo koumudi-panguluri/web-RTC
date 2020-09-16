@@ -37,7 +37,7 @@ export class VideoCallComponent implements OnInit {
     this.id = Math.floor(Math.random()*1000000000);
     this.pc = new RTCPeerConnection(this.servers);
     console.log("hh",this.pc);
-    this.pc.onicecandidate = (event => event.candidate?this.sendMessage(this.id, JSON.stringify({'ice': event.candidate})):console.log("Sent All Ice") );
+    this.pc.onicecandidate = (event => event.candidate?this.sendMessage(1, JSON.stringify({'ice': event.candidate})):console.log("Sent All Ice") );
     this.pc.onaddstream  = (event => this.clientVideo.srcObject = event.stream)
     this.database.on('child_added', this.readMessage)
   }
@@ -49,27 +49,31 @@ export class VideoCallComponent implements OnInit {
   }
 
   sendMessage(senderId, data) {
+    this.id = senderId;
     console.log("senderId",senderId,"data",data)
     let msg = this.database.push({ sender: senderId, message: data });
     setTimeout(()=>{
-      msg.remove()
-    },1000);
+      msg.remove();
+    },5000); 
    }
 
    readMessage(data) {
     let msg = JSON.parse(data.val().message);
     let sender = data.val().sender;
-    console.log("data from database",data)
-    if (sender != this.id) {
+    console.log("data from database",data,sender)
+    if (sender !== 1) {
     if (msg.ice != undefined)
     this.pc.addIceCandidate(new RTCIceCandidate(msg.ice));
     else if (msg.sdp.type == "offer")
     this.pc.setRemoteDescription(new RTCSessionDescription(msg.sdp))
     .then(() => this.pc.createAnswer())
     .then(answer => this.pc.setLocalDescription(answer))
-    .then(() => this.sendMessage(this.id, JSON.stringify({'sdp': this.pc.localDescription})));
+    .then(() => this.sendMessage(2, JSON.stringify({'sdp': this.pc.localDescription})));
     else if (msg.sdp.type == "answer")
     this.pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+    }
+    else{
+      console.log("else condition")
     }
    };
    
