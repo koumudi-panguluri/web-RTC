@@ -2,10 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
 
 
-const servers = {
-  'iceServers': [{ 'urls': 'stun:stun.services.mozilla.com' }, { 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'turn:numb.viagenie.ca', 'credential': 'webrtc', 'username': 'websitebeaver@mail.com' }]
-};
-
 @Component({
   selector: 'app-video-call',
   templateUrl: './video-call.component.html',
@@ -19,7 +15,9 @@ export class VideoCallComponent implements OnInit {
   id: any;
   pc: any;
   constructor() { }
-
+  servers = {
+    'iceServers': [{ 'urls': 'stun:stun.services.mozilla.com' }, { 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'turn:numb.viagenie.ca', 'credential': 'webrtc', 'username': 'websitebeaver@mail.com' }]
+  };
   ngOnInit(): void {
     const config = {
       apiKey: "AIzaSyAOhJiW1rootijHQaOBFglnySJk5Kh0fag",
@@ -37,7 +35,8 @@ export class VideoCallComponent implements OnInit {
     this.myVideo = document.getElementById("myVideo");
     this.clientVideo = document.getElementById("clientVideo");
     this.id = Math.floor(Math.random()*1000000000);
-    this.pc = new RTCPeerConnection(servers);
+    this.pc = new RTCPeerConnection(this.servers);
+    console.log("hh",this.pc);
     this.pc.onicecandidate = (event => event.candidate?this.sendMessage(this.id, JSON.stringify({'ice': event.candidate})):console.log("Sent All Ice") );
     this.pc.onaddstream  = (event => this.clientVideo.srcObject = event.stream)
     this.database.on('child_added', this.readMessage)
@@ -46,11 +45,15 @@ export class VideoCallComponent implements OnInit {
     this.pc.createOffer()
     .then(offer => this.pc.setLocalDescription(offer) )
     .then(() => this.sendMessage(this.id, JSON.stringify({'sdp': this.pc.localDescription})) );
+    
   }
 
   sendMessage(senderId, data) {
+    console.log("senderId",senderId,"data",data)
     let msg = this.database.push({ sender: senderId, message: data });
-    msg.remove();
+    setTimeout(()=>{
+      msg.remove()
+    },1000);
    }
 
    readMessage(data) {
