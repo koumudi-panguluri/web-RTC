@@ -40,9 +40,9 @@ export class VideoCallComponent implements OnInit {
     this.pc = new RTCPeerConnection(this.servers);
     console.log("hh",this.pc);
     this.pc.onicecandidate = (event => event.candidate?this.sendMessage(this.id, JSON.stringify({'ice': event.candidate})):console.log("Sent All Ice") );
-    this.pc.onaddstream  = (event => this.clientVideo.srcObject = event.stream)
+    this.pc.ontrack  = (event => this.clientVideo.srcObject = event.stream)
     console.log("id in on init",this.id)
-    this.database.on('child_added', this.readMessage)
+    
   }
   clientSide() {
     this.pc.createOffer()
@@ -65,8 +65,11 @@ export class VideoCallComponent implements OnInit {
     let sender = data.val().sender;
     console.log("data from database",data,sender)
     if (sender !== 119) {
-    if (msg.ice != undefined)
-    this.pc.addIceCandidate(new RTCIceCandidate(msg.ice));
+    if (msg.ice != undefined){
+      console.log("update",this.pc)
+      this.pc.addIceCandidate(new RTCIceCandidate(msg.ice));
+    }
+    
     else if (msg.sdp.type == "offer")
     this.pc.setRemoteDescription(new RTCSessionDescription(msg.sdp))
     .then(() => this.pc.createAnswer())
